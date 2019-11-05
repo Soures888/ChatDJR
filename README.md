@@ -17,3 +17,5 @@
     >./manage.py test
 8. Запустите сервер:
     >./manage.py runserver
+
+## API:
