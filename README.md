@@ -4,7 +4,7 @@
 
 1. >git clone https://bitbucket.org/soures1/isitestapp/src/master/
 2. Создайте виртуальное окружение (virtualenv)
-   >python3.7 -m venv env
+    >python3.7 -m venv env
 3. Активируйте
     >source env/bin/activate
 4. Установите зависимости:
