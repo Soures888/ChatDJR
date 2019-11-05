@@ -2,20 +2,37 @@
 
 #### Установка:
 
-* >git clone https://bitbucket.org/soures1/isitestapp/src/master/
+* Клонируйте репозиторий
+    ```
+    git clone https://bitbucket.org/soures1/isitestapp/src/master/
+    ```
 * Создайте виртуальное окружение (virtualenv)
-    >python3.7 -m venv env
+    ```
+    python3.7 -m venv env
+    ```
 * Активируйте
-    >source env/bin/activate
+    ```
+    source env/bin/activate
+    ```
 * Установите зависимости:
-    >pip install -r requirement.txt
+    ```
+    pip install -r requirement.txt
+    ```
 * Выполните миграцию БД:
-    >./manage.py migrate
+    ```
+    ./manage.py migrate
+    ```
 * Создайте супер-пользователя:
-    >./manage.py createsuperuser
+    ```
+    ./manage.py createsuperuser
+    ```
 * Запустите тесты: 
-    >./manage.py test
+    ```
+    ./manage.py test
+    ```
 * Запустите сервер:
-    >./manage.py runserver
+    ```
+    ./manage.py runserver
+    ```
 
 ## API:
