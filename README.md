@@ -41,7 +41,7 @@
 | /api/v1/chat/chats/     | GET    | - | Получает все чаты пользователя, с последним сообщением|
 | /api/v1/chat/messages/<ID>/     | GET    | - | Получает все сообщения в выбранном чате по id |
 | /api/v1/chat/messages/<ID>/     | POST    | message: String | Отправляет сообщение в выбранный чат по id |
-| /api/v1/chat/read_message/<ID>/    | POST    | - | Ставит флаг is_read = True сообщению по ID|
+| /api/v1/chat/read_message/<ID>/    | POST    | - | Ставит флаг is_read = True сообщению по id|
 | /api/v1/chat/get_unread_messages/   | GET    | - | Получает количество непрочитанных сообщений |
 
 
