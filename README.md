@@ -43,7 +43,7 @@
 | URL       | Метод                | Параметры (JSON) | Описание |
 | --- |:---:| ---:| ---:|
 | /api/v1/chat/create_chat/    | POST    | with_user : INT |  Создаёт чат (Thread) с выбранным пользователем |
-| api/v1/chat/delete_chat/<int:pk>/  | DELETE    | - |  Удаляет выбранный Thread по id|
+| /api/v1/chat/delete_chat/<int:pk>/  | DELETE    | - |  Удаляет выбранный Thread по id|
 | /api/v1/chat/chats/     | GET    | - | Получает все чаты пользователя, с последним сообщением|
 | /api/v1/chat/messages/<ID>/     | GET    | - | Получает все сообщения в выбранном чате по id |
 | /api/v1/chat/messages/<ID>/     | POST    | message: String | Отправляет сообщение в выбранный чат по id |
