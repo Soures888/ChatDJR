@@ -66,24 +66,27 @@ class ThreadGetSerializer(serializers.ModelSerializer):
     @classmethod
     def get_last_message(self, thread):
         qs = Message.objects.filter(thread=thread).last()
+        if not qs:
+            # If there is no last message, return None
+            return None
         serializer = MessageSerializer(instance=qs, many=False)
         return serializer.data
 
     class Meta:
         model = Thread
-        fields = ('participants', 'created', 'updated', 'last_message')
+        fields = ('id', 'participants', 'created', 'updated', 'last_message')
 
 
 class MessageSerializer(serializers.ModelSerializer):
     """
     To serialize messages
     """
-    sender = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    sender = serializers.ReadOnlyField(source='sender.username')
 
     class Meta:
         model = Message
-        fields = '__all__'
-        read_only_fields = ('id', 'is_read', 'created', 'updated', 'sender', 'thread')
+        fields = ('__all__')
+        read_only_fields = ('id', 'is_read', 'created', 'updated', 'thread', 'sender')
 
     def validate(self, attrs):
         """

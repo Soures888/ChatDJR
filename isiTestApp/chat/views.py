@@ -1,6 +1,10 @@
+import json
+
 from rest_framework.response import Response
 from rest_framework import generics
 from rest_framework import status
+from rest_framework import serializers
+from rest_framework import exceptions
 
 from .models import Thread, Message
 from .permissions import ThreadPermission
@@ -16,6 +20,15 @@ class ThreadPostView(generics.CreateAPIView):
     serializer_class = ThreadPostSerializer
     model = Thread
     permission_classes = (IsAuthenticated,)
+
+
+class ThreadDeleteView(generics.DestroyAPIView):
+    """
+    Destroy a Thread
+    """
+    model = Thread
+    permission_classes = (IsAuthenticated, ThreadPermission)
+    queryset = Thread.objects.all()
 
 
 class ThreadGetView(generics.ListAPIView):
@@ -48,33 +61,43 @@ class MessageView(generics.ListCreateAPIView):
                                          thread__participants=self.request.user).all()
 
 
-class ReadMessageView(generics.UpdateAPIView):
+class ReadMessageView(generics.CreateAPIView):
     """
     Toggle flag is_read
     """
     model = Message
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     serializer_class = ReadMessageSerializer
 
-    def get_queryset(self):
-        # We take only an unread message to our user
-        queryset = self.model.objects.exclude(sender=self.request.user). \
-            filter(is_read=False, thread__participants=self.request.user, pk=self.kwargs['pk'])
-        return queryset
+    def get_object(self):
+        messages_list = self.request.data.get('messages_list')
+        if not messages_list:
+            raise exceptions.ValidationError({"error": "Invalid messages_list"})
 
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        if not all(isinstance(item, int) for item in messages_list) \
+                or not isinstance(messages_list, list):
+            # Check that all numbers are int
+            raise exceptions.ValidationError({"error": "Bad request data"})
 
-        instance = self.get_object()
+        instances = Message.objects.exclude(sender=self.request.user). \
+            filter(is_read=False, thread__participants=self.request.user,
+                   pk__in=messages_list).all()
 
-        instance.is_read = True
-        instance.save()
+        if not instances:
+            raise exceptions.NotFound({"error": "No valid messages"})
 
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+        return instances
 
-        return Response(serializer.data)
+    def create(self, request, *args, **kwargs):
+        instances = self.get_object()
+
+        for instance in instances:
+            instance.is_read = True
+            instance.save()
+
+        serializer = ReadMessageSerializer(instances, many=True)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
 
 
 class UnreadMessagesView(generics.ListAPIView):

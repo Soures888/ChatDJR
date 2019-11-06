@@ -7,6 +7,7 @@ class ThreadPermission(permissions.BasePermission):
         super().__init__()
 
     def has_permission(self, request, view):
-        thread_object = Thread.objects.filter(participants=request.user, pk=view.kwargs['pk']).first()
+        thread_object = Thread.objects.\
+            filter(participants=request.user, pk=view.kwargs['pk']).first()
         if thread_object:
             return True

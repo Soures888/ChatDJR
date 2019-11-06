@@ -18,6 +18,9 @@ class ThreadViewSetTestCase(APITestCase):
         self.second_user = User.objects.create_user(username='isitest2', password='very_strong_password')
         self.second_user.save()
 
+        self.third_user = User.objects.create_user(username='isitest3', password='very_strong_password')
+        self.third_user.save()
+
         resp = self.client.post(self.create_token_url, {'username': 'isitest', 'password': 'very_strong_password'},
                                 format='json')
         self.token = resp.data['token']
@@ -41,6 +44,34 @@ class ThreadViewSetTestCase(APITestCase):
         resp = self.client.post(url, data={"with_user": 2}, format='json')
 
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+    def test_delete_thread(self):
+        delete_chat = reverse('delete_chat', kwargs={"pk": 1})
+        create_chat = reverse('create_chat')
+
+        # With invalid pk
+        resp = self.client.delete(delete_chat)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, resp.status_code)
+
+        # create chat
+        resp = self.client.post(create_chat, data={"with_user": 2}, format='json')
+
+        # Third user
+        resp = self.client.post(self.create_token_url,
+                                {'username': 'isitest3', 'password': 'very_strong_password'}, format='json')
+        token = resp.data['token']
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(token))
+
+        resp = self.client.delete(delete_chat)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, resp.status_code)
+
+        # Second user
+        resp = self.client.post(self.create_token_url,
+                                {'username': 'isitest2', 'password': 'very_strong_password'}, format='json')
+        token = resp.data['token']
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(token))
+        resp = self.client.delete(delete_chat)
+        self.assertEqual(status.HTTP_204_NO_CONTENT, resp.status_code)
 
     def test_get_thread(self):
         view_chat_url = reverse('view_chats')
@@ -70,7 +101,7 @@ class MessageViewSetTestCase(APITestCase):
         self.second_user.save()
 
         self.third_user = User.objects.create_user(username='isitest3', password='very_strong_password')
-        self.second_user.save()
+        self.third_user.save()
 
         resp = self.client.post(self.create_token_url, {'username': 'isitest', 'password': 'very_strong_password'},
                                 format='json')
@@ -115,7 +146,7 @@ class MessageViewSetTestCase(APITestCase):
     def test_read_message(self):
         message_url = reverse('messages', kwargs={'pk': 1})
         create_chat_url = reverse('create_chat')
-        read_url = reverse('read_message', kwargs={'pk': 1})
+        read_url = reverse('read_messages')
 
         # Create Thread
         resp = self.client.post(create_chat_url, data={"with_user": 2}, format='json')
@@ -125,7 +156,7 @@ class MessageViewSetTestCase(APITestCase):
         resp = self.client.post(message_url, {'message': test_text})
 
         # We cannot send flag is_read to our message
-        resp = self.client.patch(read_url)
+        resp = self.client.post(read_url, {"messages_list": [1]}, format='json')
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
         # Other user
@@ -134,8 +165,8 @@ class MessageViewSetTestCase(APITestCase):
         token = resp.data['token']
         self.client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(token))
 
-        # Read Message
-        resp = self.client.patch(read_url)
+        # Send is_read flag
+        resp = self.client.post(read_url, {"messages_list": [1]}, format='json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
         # Messages
@@ -146,7 +177,6 @@ class MessageViewSetTestCase(APITestCase):
         unread_message_url = reverse('get_unread_messages')
         message_url = reverse('messages', kwargs={'pk': 1})
         create_chat_url = reverse('create_chat')
-        read_url = reverse('read_message', kwargs={'pk': 1})
 
         # Get unread messages
         resp = self.client.get(unread_message_url)
