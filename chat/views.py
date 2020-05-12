@@ -1,14 +1,11 @@
-import json
-
 from rest_framework.response import Response
 from rest_framework import generics
 from rest_framework import status
-from rest_framework import serializers
 from rest_framework import exceptions
 
 from .models import Thread, Message
 from .permissions import ThreadPermission
-from isiTestApp.chat.serializers import ThreadPostSerializer, MessageSerializer, \
+from chat import ThreadPostSerializer, MessageSerializer, \
     ThreadGetSerializer, ReadMessageSerializer
 from rest_framework.permissions import IsAuthenticated
 
